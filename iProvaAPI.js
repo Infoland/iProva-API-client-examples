@@ -1,4 +1,4 @@
-﻿iProvaAPI = function iProvaAPI(config)
+﻿﻿iProvaAPI = function iProvaAPI(config)
 {
 	/// <summary>Helper class for call iProva API's</summary>
 	/// <param name="iProvaUrl" type="string">URL of iProva</param>
@@ -6,14 +6,14 @@
 	/// <returns></returns>
 
 	this._iProvaURL = config.iProvaUrl;
-	this._logonMethod = config.logonMethod;	
+	this._logonMethod = config.logonMethod;
 	this._alwaysGetNewUserToken = config.alwaysGetNewUserToken;
 	this._version = config.version;
 	this._apiKey = config.apiKey;
 
 	if (config.logonMethod === iProvaAPI.Enumerations.LogonMethod.WindowsAuthentication && !config.apiKey)
 		throw new Error('When using WindowsAuthentication an api key must be used.')
-	
+
 	//append trailing / if needed
 	if (this._iProvaURL[this._iProvaURL.length - 1] != "/")
 		this._iProvaURL += "/";
@@ -21,7 +21,7 @@
 	//initiate token helper	
 	if (this._logonMethod !== iProvaAPI.Enumerations.LogonMethod.None)
 		this._tokenHelper = new iProvaAPI.TokenHelper(this._iProvaURL, this._logonMethod);
-	
+
 	return this;
 }
 
@@ -30,28 +30,28 @@ iProvaAPI.Enumerations = {};
 iProvaAPI.Enumerations.LogonMethod =
 	{
 		"None": 0,
-		"Cookie":1,
+		"Cookie": 1,
 		"WindowsAuthentication": 2,
 		"ADFS": 3,
-		"SAML2": 4, 
+		"SAML2": 4,
 		"SAML": 5		//SAML2 or ADFS (auto selects the correct variant for the AutoLoginType set in iProva)
 	};
 
 iProvaAPI.WCFCallParameters =
-{
-	endpoint: '',
-	method: '',
-	parameters: {},
-	callback: null
-}
+	{
+		endpoint: '',
+		function: '',
+		parameters: {},
+		callback: null
+	}
 
 iProvaAPI.RESTCallParameters =
-{
-	method: '',
-	path: '',
-	parameters: {},
-	callback: null	
-}
+	{
+		method: '',
+		path: '',
+		parameters: {},
+		callback: null
+	}
 
 iProvaAPI.prototype._ajaxError = function (jqxhr, textStatus, errorThrown)
 {
@@ -61,7 +61,7 @@ iProvaAPI.prototype._ajaxError = function (jqxhr, textStatus, errorThrown)
 	/// <param name="errorThrown" type="string">textual portion of the HTTP status</param>
 	/// <returns></returns>
 
-	iProvaAPI.showAjaxError(jqxhr, textStatus, errorThrown, '@@textStatus@@ during API Call.')	
+	iProvaAPI.showAjaxError(jqxhr, textStatus, errorThrown, '@@textStatus@@ during API Call.')
 }
 
 iProvaAPI.prototype.callWCF = function (callParameters, forceNewToken)
@@ -70,6 +70,12 @@ iProvaAPI.prototype.callWCF = function (callParameters, forceNewToken)
 	/// <param name="callParameters" type="iProvaAPI.WCFCallParameters">WCF function parameter object. note: don't set objCredentials, it will be set automatically.</param>
 	/// <param name="forceNewToken" type="boolean">Force getting a new token, instead of re-using the previous token</param>
 	/// <returns></returns>
+
+	if (this._logonMethod == iProvaAPI.Enumerations.LogonMethod.Cookie)
+	{
+		throw new Error('Cookie authentication is not supported for WCF calls');
+		return;
+	}
 
 	var apiCallFunction = function (callParameters, token)
 	{
@@ -84,9 +90,9 @@ iProvaAPI.prototype.callWCF = function (callParameters, forceNewToken)
 
 		$.ajax({
 			method: "POST",
-			url: this._iProvaURL + callParameters.endpoint + "/web/" + callParameters.method,
+			url: this._iProvaURL + callParameters.endpoint + "/web/" + callParameters.function,
 			contentType: "application/json",
-			data: JSON.stringify(callParameters.parameters),			
+			data: JSON.stringify(callParameters.parameters),
 			success: function (result)
 			{
 				callParameters.callback(result);
@@ -127,14 +133,14 @@ iProvaAPI.prototype.callREST = function (callParameters, forceNewToken)
 	/// <returns></returns>
 
 	var apiCallFunction = function (callParameters, token)
-	{	
+	{
 		$.ajax({
 			method: callParameters.method,
 			url: this._iProvaURL + callParameters.path,
 			crossDomain: true,
 			xhrFields: {
 				withCredentials: (this._logonMethod === iProvaAPI.Enumerations.LogonMethod.WindowsAuthentication || this._logonMethod === iProvaAPI.Enumerations.LogonMethod.Cookie)
-			},						
+			},
 			beforeSend: function (request)
 			{
 				//if a token is set, set the token in authorization header
@@ -196,7 +202,7 @@ iProvaAPI.TokenHelper = function (iProvaUrl, logonMethod)
 
 	this._iProvaURL = iProvaUrl;
 	this._logonMethod = logonMethod;
-	this._token = null;	
+	this._token = null;
 
 	return this;
 };
@@ -212,7 +218,7 @@ iProvaAPI.TokenHelper.prototype.getToken = function (callback, forceNewToken)
 		callback(this._token);
 	}
 	else
-	{		
+	{
 		//function to call the callback after getting a new token
 		var afterTokenCallback = function (getTokenCallback, token)
 		{
@@ -227,11 +233,11 @@ iProvaAPI.TokenHelper.prototype.getToken = function (callback, forceNewToken)
 			case iProvaAPI.Enumerations.LogonMethod.WindowsAuthentication:
 				this._getTokenViaWinAuth(afterTokenCallback);
 				break;
-			case iProvaAPI.Enumerations.LogonMethod.ADFS:				
-				this._getTokenViaSAML(afterTokenCallback, 'adfs');				
+			case iProvaAPI.Enumerations.LogonMethod.ADFS:
+				this._getTokenViaSAML(afterTokenCallback, 'adfs');
 				break;
 			case iProvaAPI.Enumerations.LogonMethod.SAML2:
-				this._getTokenViaSAML(afterTokenCallback, 'saml2');								
+				this._getTokenViaSAML(afterTokenCallback, 'saml2');
 				break;
 			case iProvaAPI.Enumerations.LogonMethod.SAML:
 				this._getTokenViaSAML(afterTokenCallback, null);
@@ -248,13 +254,13 @@ iProvaAPI.TokenHelper.prototype._processSAMLRequestResponse = function (samlinfo
 	/// <returns></returns>
 
 	//create frane to execute SAML request
-	var samlFrame = document.createElement('iframe');	
+	var samlFrame = document.createElement('iframe');
 	samlFrame.style.display = 'none';
-	samlFrame.name = 'samlFrame' + iProvaAPI.TokenHelper._samlFrameCount++;	
+	samlFrame.name = 'samlFrame' + iProvaAPI.TokenHelper._samlFrameCount++;
 
 	var messageTimeout;
 	var messageReceivedHandler = function (e)
-	{		
+	{
 		try
 		{
 			var objData = JSON.parse(e.data);
@@ -284,7 +290,7 @@ iProvaAPI.TokenHelper.prototype._processSAMLRequestResponse = function (samlinfo
 
 	//wait for a message that will be send from the window when user is authenticated
 	window.addEventListener('message', messageReceivedHandler.bind(this));
-	
+
 	switch (samlinfo.method)
 	{
 		case 'POST':
@@ -300,17 +306,17 @@ iProvaAPI.TokenHelper.prototype._processSAMLRequestResponse = function (samlinfo
 			samlFrame.samlForm = samlForm;
 			//add frame and form to document
 			document.body.appendChild(samlFrame);
-			document.body.appendChild(samlForm[0]);			
+			document.body.appendChild(samlForm[0]);
 			//trigger form submit to start SAML process
 			samlForm.submit();
-		
+
 			break;
 
 		case 'GET':
 			//Set frame URL to start SAML process
-			samlFrame.src = samlinfo.url;		
+			samlFrame.src = samlinfo.url;
 			document.body.appendChild(samlFrame);
-			break;		
+			break;
 	}
 
 	//use timeout
@@ -325,7 +331,7 @@ iProvaAPI.TokenHelper.prototype._ajaxError = function (jqxhr, textStatus, errorT
 	/// <param name="errorThrown" type="string">textual portion of the HTTP status</param>
 	/// <returns></returns>	
 
-	iProvaAPI.showAjaxError(jqxhr, textStatus, errorThrown, '@@textStatus@@ while getting token.')	
+	iProvaAPI.showAjaxError(jqxhr, textStatus, errorThrown, '@@textStatus@@ while getting token.')
 }
 
 iProvaAPI.TokenHelper.prototype._getTokenViaSAML = function (callback, variant)
@@ -337,7 +343,7 @@ iProvaAPI.TokenHelper.prototype._getTokenViaSAML = function (callback, variant)
 
 	$.ajax({
 		method: "GET",
-		url: this._iProvaURL + "api/saml" + (variant ? '/' + variant:''),
+		url: this._iProvaURL + "api/saml" + (variant ? '/' + variant : ''),
 		contentType: "application/json",
 		crossDomain: true,
 		xhrFields: {
@@ -362,7 +368,7 @@ iProvaAPI.TokenHelper.prototype._getTokenViaWinAuth = function (callback)
 	$.ajax({
 		method: "GET",
 		url: this._iProvaURL + "management/login/GetWinAuthToken.ashx",
-		contentType: "text/plain", 
+		contentType: "text/plain",
 		crossDomain: true,
 		xhrFields: {
 			withCredentials: true
