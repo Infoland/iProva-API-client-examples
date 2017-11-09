@@ -2,7 +2,7 @@
 {
 	/// <summary>Helper class for call iProva API's</summary>
 	/// <param name="iProvaUrl" type="string">URL of iProva</param>
-	/// <param name="logonMethod" type="iProvaAPI.Enumerations.LogonMethod">Login method to use to identify user</param>
+	/// <param name="config" type="object">Client configuration object</param>
 	/// <returns></returns>
 
 	this._iProvaURL = config.iProvaUrl;
@@ -76,6 +76,10 @@ iProvaAPI.prototype.callWCF = function (callParameters, forceNewToken)
 		throw new Error('Cookie authentication is not supported for WCF calls');
 		return;
 	}
+
+	//ensure there is a parameters object
+	if (!callParameters.parameters)
+		callParameters.parameters = {};
 
 	var apiCallFunction = function (callParameters, token)
 	{
