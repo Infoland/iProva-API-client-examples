@@ -16,8 +16,9 @@ use the user's windows logon to authenticate to the REST api.
 The WCF endpoints all use token authentication. 
 Thus for WCF calls a user-token is retreived for all authentication methods.
 
-
 ## Requirements
+- For SAML authentication and REST: iProva **5.7 (not yet available)** 
+- For Windows authentication and WCF: iProva **5.6** 
 
 - The scripts require the jQuery library. Supported versions are 1.5 or later.
 
@@ -25,7 +26,7 @@ Thus for WCF calls a user-token is retreived for all authentication methods.
 
 - iProva API key marked as '*API key to use for generating tokens in case the API is used via Windows authentication, SAML2 or ADFS*'.
 
-- For Windows authentication ans api-key is required.
+- For Windows authentication an api-key is required.
 
 ## Setup
 
