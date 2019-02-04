@@ -1,4 +1,4 @@
-﻿﻿iProvaAPI = function iProvaAPI(config)
+﻿iProvaAPI = function iProvaAPI(config)
 {
 	/// <summary>Helper class for call iProva API's</summary>
 	/// <param name="iProvaUrl" type="string">URL of iProva</param>
@@ -273,11 +273,11 @@ iProvaAPI.TokenHelper.prototype._processSAMLRequestResponse = function (samlinfo
 				window.removeEventListener('message', messageReceivedHandler);
 
 				//remove form				
-				if (samlFrame.samlFrom)
-					samlFrame.samlFrom.parentNode.removeChild(samlFrame.samlFrom);
+                if (samlFrame.samlForm)
+                    samlFrame.samlForm.parentNode.removeChild(samlFrame.samlForm);
 
 				//remove frame
-				samlFrame.parentNode.removeChild(samlFrame);
+                samlFrame.parentNode.removeChild(samlFrame);
 				window.clearTimeout(messageTimeout);
 
 				callback(objData.iProvaToken);
