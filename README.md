@@ -65,12 +65,9 @@ Which method you can use depends on which is enabled in the iProva system settin
 
 - **WindowsAuthentication**: If iProva has Windows authentication enabled. The user's windows account can be used. <sup>2</sup>
 
-<sup>
+<sup>1. Cookie authentication can only be used to call REST api.</sup>
 
-1. Cookie authentication can only be used to call REST api.
-2. From **iProva 5.10** the REST API only supports Windows authentication on the `bearer_tokens/winauth` route.
-
-</sup>
+<sup>2. From **iProva 5.10** the REST API only supports Windows authentication on the `bearer_tokens/winauth` route.</sup>
 
 
 ## Call REST api
