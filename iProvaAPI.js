@@ -18,7 +18,7 @@
 	if (this._iProvaURL[this._iProvaURL.length - 1] != "/")
 		this._iProvaURL += "/";
 
-	//initiate token helper	
+	//initiate token helper
 	if (this._logonMethod !== iProvaAPI.Enumerations.LogonMethod.None)
 		this._tokenHelper = new iProvaAPI.TokenHelper(this._iProvaURL, this._logonMethod);
 
@@ -143,17 +143,13 @@ iProvaAPI.prototype.callREST = function (callParameters, forceNewToken)
 			url: this._iProvaURL + callParameters.path,
 			crossDomain: true,
 			xhrFields: {
-				withCredentials: (this._logonMethod === iProvaAPI.Enumerations.LogonMethod.WindowsAuthentication || this._logonMethod === iProvaAPI.Enumerations.LogonMethod.Cookie)
+				withCredentials: (this._logonMethod === iProvaAPI.Enumerations.LogonMethod.Cookie)
 			},
 			beforeSend: function (request)
 			{
 				//if a token is set, set the token in authorization header
 				if (token)
 					request.setRequestHeader('Authorization', 'token ' + token);
-
-				//set x-authentication header to 'windows' to request windows authentication process
-				if (this._logonMethod === iProvaAPI.Enumerations.LogonMethod.WindowsAuthentication)
-					request.setRequestHeader('x-authentication', 'windows');
 
 				if (this._version)
 					request.setRequestHeader("x-api-version", this._version);
@@ -169,7 +165,7 @@ iProvaAPI.prototype.callREST = function (callParameters, forceNewToken)
 			},
 			error: function (jqxhr, textStatus, errorThrown)
 			{
-				//token expired?				
+				//token expired?
 				if (jqxhr.responseJSON && jqxhr.responseJSON.ErrorCode == 1014)
 					this.callREST(callParameters, true);
 				else
@@ -180,8 +176,8 @@ iProvaAPI.prototype.callREST = function (callParameters, forceNewToken)
 	}.bind(this, callParameters);
 
 
-	//get token first? (saml variants)
-	if (this._logonMethod >= iProvaAPI.Enumerations.LogonMethod.ADFS)
+	//get token first? (winauth / saml variants)
+	if (this._logonMethod >= iProvaAPI.Enumerations.LogonMethod.WindowsAuthentication)
 	{
 		if (arguments.length == 1)
 			forceNewToken = false;
@@ -272,7 +268,7 @@ iProvaAPI.TokenHelper.prototype._processSAMLRequestResponse = function (samlinfo
 			{
 				window.removeEventListener('message', messageReceivedHandler);
 
-				//remove form				
+				//remove form
                 if (samlFrame.samlForm)
                     samlFrame.samlForm.parentNode.removeChild(samlFrame.samlForm);
 
@@ -298,7 +294,7 @@ iProvaAPI.TokenHelper.prototype._processSAMLRequestResponse = function (samlinfo
 	switch (samlinfo.method)
 	{
 		case 'POST':
-			//create form to post to frame						
+			//create form to post to frame
 			var samlForm = $('<form method="POST" />');
 			samlForm.hide();
 			samlForm.append($('<input name="SAMLRequest" />').val(samlinfo.post_data));
@@ -333,7 +329,7 @@ iProvaAPI.TokenHelper.prototype._ajaxError = function (jqxhr, textStatus, errorT
 	/// <param name="jqxhr" type="jqXHR">jQuery jqXHR object, which is a superset of the XMLHTTPRequest object. (http://api.jquery.com/jQuery.ajax/#jqXHR)</param>
 	/// <param name="textStatus" type="string">Possible values are "timeout", "error", "abort", and "parsererror"</param>
 	/// <param name="errorThrown" type="string">textual portion of the HTTP status</param>
-	/// <returns></returns>	
+	/// <returns></returns>
 
 	iProvaAPI.showAjaxError(jqxhr, textStatus, errorThrown, '@@textStatus@@ while getting token.')
 }
