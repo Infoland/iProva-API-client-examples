@@ -303,7 +303,7 @@ iProvaAPI.TokenHelper.prototype._processSAMLRequestResponse = function (samlinfo
 			samlForm.attr('id', samlFrame.name + '_form');
 
 			//set reference to form to cleanup later
-			samlFrame.samlForm = samlForm;
+			samlFrame.samlForm = samlForm[0];
 			//add frame and form to document
 			document.body.appendChild(samlFrame);
 			document.body.appendChild(samlForm[0]);
